@@ -58,14 +58,14 @@
   <script>
     // Configurazione Firebase (sostituire con i tuoi valori)
     const firebaseConfig = {
-  apiKey: "AIzaSyC0mhA5PSRQSirk4vuGKUzNs4L0TK7EGNw",
-  authDomain: "tcgp-tracker-ab396.firebaseapp.com",
-  projectId: "tcgp-tracker-ab396",
-  storageBucket: "tcgp-tracker-ab396.firebasestorage.app",
-  messagingSenderId: "967621803272",
-  appId: "1:967621803272:web:ef81deef2ad0a0d56e40bd",
-  measurementId: "G-E1370SR9TF"
-};
+      apiKey: "AIzaSyC0mhA5PSRQSirk4vuGKUzNs4L0TK7EGNw",
+      authDomain: "tcgp-tracker-ab396.firebaseapp.com",
+      projectId: "tcgp-tracker-ab396",
+      storageBucket: "tcgp-tracker-ab396.firebasestorage.app",
+      messagingSenderId: "967621803272",
+      appId: "1:967621803272:web:ef81deef2ad0a0d56e40bd",
+      measurementId: "G-E1370SR9TF"
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     firebase.auth().signInAnonymously().catch(console.error);
