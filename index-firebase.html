@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png" sizes="192x192" type="image/png">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-180-padded.png">
+  <meta name="theme-color" content="#1976d2">
+  <title>TCGP Tracker</title>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+  <style>
+    :root { --bg: #f3f5f7; --card-bg: #ffffff; --primary: #1976d2; --text: #333333; --text-light: #777777; --accent: #4caf50; --radius: 8px; }
+    * { box-sizing: border-box; margin:0; padding:0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Tahoma, sans-serif; padding:1rem; }
+    .box { max-width:480px; margin:auto; background:var(--card-bg); padding:1rem; border-radius:var(--radius); box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+    h1,h2 { text-align:center; color:var(--primary); margin-bottom:1rem;}
+    .controls { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; }
+    .controls label { font-size:0.9rem; color:var(--text-light); }
+    .controls input[type=number] { width:3rem; padding:0.2rem; border:1px solid #ccc; border-radius:var(--radius); text-align:center; }
+    .controls button { padding:0.4rem 0.8rem; background:var(--primary); color:#fff; border:none; border-radius:var(--radius); cursor:pointer; font-size:0.9rem; }
+    .stats { font-size:0.9rem; margin:1rem 0; }
+    .barWrap { background:#e0e0e0; border-radius:var(--radius); overflow:hidden; height:12px; margin-bottom:1rem; }
+    .bar { background:var(--accent); height:12px; width:0%; }
+    canvas { width:100%!important; margin-bottom:1rem; }
+    hr { border:none; border-top:1px solid #eee; margin:1rem 0; }
+    .set { margin-top:1rem; font-weight:bold; color:var(--primary); border-bottom:1px solid #ddd; padding-bottom:0.2rem; }
+    .card { display:flex; align-items:center; padding:0.3rem 0; }
+    .card input { margin-right:0.5rem; width:1rem; height:1rem; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>TCGP Tracker</h1>
+    <div class="controls">
+      <label>Buste al giorno:
+        <input type="number" id="packs" min="2" max="4" step="1" value="3">
+      </label>
+      <button id="resetBtn">Azzera</button>
+    </div>
+    <div id="counts" class="stats"></div>
+    <div id="pattern" class="stats"></div>
+    <div class="barWrap"><div id="progressBar" class="bar"></div></div>
+    <canvas id="percentileChart"></canvas>
+    <h2>Andamento giornaliero</h2>
+    <canvas id="dailyTrendChart"></canvas>
+    <h2>Mancanti per rarità</h2>
+    <canvas id="rarityChart"></canvas>
+    <hr>
+    <div id="list"></div>
+  </div>
+  <script>
+    // Configurazione Firebase (sostituire con i tuoi valori)
+    const firebaseConfig = {
+      apiKey: "TUA_API_KEY",
+      authDomain: "TUO_PROJECT_ID.firebaseapp.com",
+      projectId: "TUO_PROJECT_ID",
+      storageBucket: "TUO_PROJECT_ID.appspot.com",
+      messagingSenderId: "TUO_SENDER_ID",
+      appId: "TUO_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    firebase.auth().signInAnonymously().catch(console.error);
+
+    let uid, found = {}, dailyLog = [];
+
+    firebase.auth().onAuthStateChanged(user => {
+      if (!user) return;
+      uid = user.uid;
+      db.collection('users').doc(uid).get()
+        .then(doc => {
+          const data = doc.data();
+          if (data) { found = data.found || {}; dailyLog = data.dailyLog || []; }
+        })
+        .finally(() => initApp());
+    });
+
+    function saveStateToDB() {
+      if (!uid) return;
+      db.collection('users').doc(uid).set({ found, dailyLog });
+    }
+
+    const cards = [
+      ["Solgaleo","Trevenant",2],["Solgaleo","Tapu Bulu",3],["Solgaleo","Talonflame",3],
+      ["Solgaleo","Incineroar ex",4],["Solgaleo","Sandlash",2],["Solgaleo","Cloyster",2],
+      ["Solgaleo","Crabominable ex",4],["Solgaleo","Oricorio",3],["Solgaleo","Tapu Koko",3],
+      ["Solgaleo","Sandygast",1],["Solgaleo","Palossand",3],["Solgaleo","Crabrawler",1],
+      ["Solgaleo","Klefki",3],["Solgaleo","Magearna",3],["Solgaleo","Drampa",3],
+      ["Solgaleo","Hawlucha",2],["Solgaleo","Komala",2],
+      ["Lunala","Exeggcute",1],["Lunala","Decidueye ex",4],["Lunala","Morelull",1],
+      ["Lunala","Litten",1],["Lunala","Sandlash",2],["Lunala","Ninetales",3],
+      ["Lunala","Popplio",1],["Lunala","Brionne",2],["Lunala","Primarina",3],
+      ["Lunala","Oricorio-N",2],["Lunala","Tapu Lele",3],["Lunala","Necrozma",3],
+      ["Lunala","Conkeldurr",3],["Lunala","Lycanroc",3],["Lunala","Raticate",2],
+      ["Lunala","Kommo-o",3],["Lunala","Oranguru",3],["Lunala","Oricorio-S",2]
+    ];
+    const pR = {1:0.06664397,2:0.04365052,3:0.00917221,4:0.01661559};
+    let percentileChart, dailyTrendChart, rarityChart;
+
+    function initApp(){ renderList(); initCharts(); updateUI(); }
+    function monteCarlo(sol,lun,packs,sims=500){ const rar=[1,2,3,4],pat=['L','L','S']; function run(){let s=sol,l=lun,day=0,idx=0;while(s>0||l>0){day++;for(let i=0;i<packs;i++){const set=l>0?pat[idx++%3]:'S',r=rar[Math.floor(Math.random()*4)];if(Math.random()<pR[r]){if(set==='L'&&l>0)l--;else if(set==='S'&&s>0)s--;}}}return day;}const arr=Array.from({length:sims},run).sort((a,b)=>a-b);return[0.5,0.75,0.9,0.99].map(p=>arr[Math.floor(arr.length*p)-1]);}
+    function logDailyProgress(count){const today=new Date().toISOString().slice(0,10);if(!dailyLog.length||dailyLog[dailyLog.length-1].date!==today){dailyLog.push({date:today,count});}}
+    function renderList(){const c=document.getElementById("list");let h="";["Lunala","Solgaleo"].forEach(set=>{h+=`<div class="set">${set}</div>`;cards.filter(c=>c[0]===set).forEach((c,i)=>{const id=`${set}_${i}`,chk=found[id]?"checked":"";h+=`<div class="card"><input type="checkbox" id="${id}" ${chk}><label for="${id}">${c[1]} (R${c[2]})</label></div>`;});});c.innerHTML=h;c.querySelectorAll(".card input").forEach(cb=>cb.onchange=()=>{found[cb.id]=cb.checked;saveStateToDB();updateUI();});}
+    function initCharts(){const ctx1=document.getElementById("percentileChart").getContext("2d");percentileChart=new Chart(ctx1,{type:'bar',data:{labels:['50%','75%','90%','99%'],datasets:[{label:'Giorni stimati',data:[0,0,0,0],backgroundColor:'rgba(25,118,210,0.7)'}]},options:{responsive:true,scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}}}});const ctx2=document.getElementById("dailyTrendChart").getContext("2d");dailyTrendChart=new Chart(ctx2,{type:'line',data:{labels:[],datasets:[{label:'Carte trovate',data:[],fill:false,borderColor:'var(--primary)'}]},options:{responsive:true,scales:{x:{display:true},y:{beginAtZero:true}}}});const ctx3=document.getElementById("rarityChart").getContext("2d");rarityChart=new Chart(ctx3,{type:'bar',data:{labels:['R1','R2','R3','R4'],datasets:[{label:'Mancanti',data:[0,0,0,0],backgroundColor:['#aed581','#81c784','#4db6ac','#4caf50']}]},options:{responsive:true,scales:{y:{beginAtZero:true}},plugins:{legend:{display:false}}}});}
+    function updateUI(){const packs=+document.getElementById("packs").value||3,total=cards.length,foundCount=Object.values(found).filter(v=>v).length;const solMiss=cards.filter((c,i)=>c[0]==="Solgaleo"&&!found[`Solgaleo_${cards.filter(cc=>cc[0]==="Solgaleo").indexOf(c)}`]).length;const lunMiss=cards.filter((c,i)=>c[0]==="Lunala"&&!found[`Lun...
+    document.getElementById("packs").onchange=updateUI;document.getElementById("resetBtn").onclick=()=>{if(confirm("Azzera tutto?")){found={};dailyLog=[];saveStateToDB();renderList();updateUI();}};document.addEventListener("DOMContentLoaded",()=>{renderList();initCharts();updateUI();});
+  </script>
+</body>
+</html>
