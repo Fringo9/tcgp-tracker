@@ -40,9 +40,10 @@
   <script>eruda.init();</script>
   <div class="box">
     <h1>TCGP Tracker</h1>
-    <button id="loginBtn" style="margin-bottom:1rem;">
-      Accedi con Google
-    </button>
+    <input id="email"    type="email"    placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+<button id="signUpBtn">Registrati</button>
+<button id="signInBtn">Accedi</button>
     <div class="controls">
       <label>Buste al giorno:
         <input type="number" id="packs" min="2" max="4" value="3">
@@ -77,6 +78,22 @@
     firebase.auth().signInAnonymously().catch(console.error);
 
     let uid, found = {}, dailyLog = [];
+    
+    document.getElementById('signUpBtn').onclick = () => {
+  const email = document.getElementById('email').value;
+  const pw    = document.getElementById('password').value;
+  firebase.auth().createUserWithEmailAndPassword(email, pw)
+    .then(cred => console.log("🔑 Registrato:", cred.user.email))
+    .catch(err => console.error("❌ Sign-Up error:", err));
+};
+
+document.getElementById('signInBtn').onclick = () => {
+  const email = document.getElementById('email').value;
+  const pw    = document.getElementById('password').value;
+  firebase.auth().signInWithEmailAndPassword(email, pw)
+    .then(cred => console.log("🔑 Loggato:", cred.user.email))
+    .catch(err => console.error("❌ Sign-In error:", err));
+};
     
     firebase.auth().onAuthStateChanged(user => {
       if (!user) return;
