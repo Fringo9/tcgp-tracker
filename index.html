@@ -82,10 +82,9 @@
     const googleProvider = new firebase.auth.GoogleAuthProvider();
 
     document.addEventListener('DOMContentLoaded', () => {
-  const loginBtn  = document.getElementById('btnGoogleLogin');
-  const logoutBtn = document.getElementById('btnGoogleLogout');
+  const loginBtn  = document.getElementById('btnGoogleLogin"');
 
-  if (!loginBtn || !logoutBtn) {
+  if (!loginBtn) {
     console.error('❗️ Non trovo i button Google – controlla che abbiano l’id corretto');
     return;
   }
@@ -96,14 +95,6 @@
     firebase.auth()
       .signInWithRedirect(provider)
       .catch(err => console.error('❌ Google SignIn error:', err));
-  });
-
-  // Logout
-  logoutBtn.addEventListener('click', () => {
-    firebase.auth()
-      .signOut()
-      .then(() => console.log('🗝️ Logout effettuato'))
-      .catch(err => console.error('❌ Logout error:', err));
   });
 
     // 4) Gestione dello stato d’autenticazione
@@ -118,7 +109,6 @@
   firebase.auth().onAuthStateChanged(user => {
     if (user) {
       loginBtn.style.display  = 'none';
-      logoutBtn.style.display = 'inline-block';
       uid = user.uid;
       db.collection('users').doc(uid).get()
         .then(doc => {
@@ -129,7 +119,6 @@
         .finally(initApp);
     } else {
       loginBtn.style.display  = 'inline-block';
-      logoutBtn.style.display = 'none';
     }
   });
 });
