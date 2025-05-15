@@ -81,18 +81,30 @@
     // 1) Configura il provider
     const googleProvider = new firebase.auth.GoogleAuthProvider();
 
-    // 2) Login con redirect (più affidabile su mobile)
-    document.getElementById('btnGoogleLogin').onclick = () => {
-      firebase.auth().signInWithRedirect(googleProvider)
-      .catch(err => console.error("❌ Google SignIn error:", err));
-    };
+    document.addEventListener('DOMContentLoaded', () => {
+  const loginBtn  = document.getElementById('btnGoogleLogin');
+  const logoutBtn = document.getElementById('btnGoogleLogout');
 
-    // 3) Logout
-    document.getElementById('btnGoogleLogout').onclick = () => {
-      firebase.auth().signOut()
-      .then(() => console.log("🗝️ Logout effettuato"))
-      .catch(err => console.error("❌ Logout error:", err));
-    };
+  if (!loginBtn || !logoutBtn) {
+    console.error('❗️ Non trovo i button Google – controlla che abbiano l’id corretto');
+    return;
+  }
+
+  // Login con redirect
+  loginBtn.addEventListener('click', () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    firebase.auth()
+      .signInWithRedirect(provider)
+      .catch(err => console.error('❌ Google SignIn error:', err));
+  });
+
+  // Logout
+  logoutBtn.addEventListener('click', () => {
+    firebase.auth()
+      .signOut()
+      .then(() => console.log('🗝️ Logout effettuato'))
+      .catch(err => console.error('❌ Logout error:', err));
+  });
 
     // 4) Gestione dello stato d’autenticazione
     firebase.auth().getRedirectResult()
@@ -102,25 +114,11 @@
       // (ma onAuthStateChanged verrà comunque richiamato)
     });
 
-firebase.auth().onAuthStateChanged(user => {
-  const loginBtn  = document.getElementById('btnGoogleLogin');
-  const logoutBtn = document.getElementById('btnGoogleLogout');
-  if (user) {
-    console.log("🔑 Autenticato:", user.email);
-    loginBtn.style.display  = 'none';
-    logoutBtn.style.display = 'inline-block';
-    uid = user.uid;
-    // AVVIA caricamento dati + UI:
-    loadAndInit();
-  } else {
-    console.log("👤 Utente non autenticato");
-    loginBtn.style.display  = 'inline-block';
-    logoutBtn.style.display = 'none';
-  }
-});
-    
-    firebase.auth().onAuthStateChanged(user => {
-      if (!user) return;
+      // Stato auth
+  firebase.auth().onAuthStateChanged(user => {
+    if (user) {
+      loginBtn.style.display  = 'none';
+      logoutBtn.style.display = 'inline-block';
       uid = user.uid;
       db.collection('users').doc(uid).get()
         .then(doc => {
@@ -129,7 +127,12 @@ firebase.auth().onAuthStateChanged(user => {
           dailyLog = data.dailyLog || [];
         })
         .finally(initApp);
-    });
+    } else {
+      loginBtn.style.display  = 'inline-block';
+      logoutBtn.style.display = 'none';
+    }
+  });
+});
 
     function initApp() {
       renderList();
