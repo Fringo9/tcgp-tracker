@@ -76,14 +76,12 @@
     let uid, found = {}, dailyLog = [];
     
     <button id="loginBtn">Accedi con Google</button>
-    <script>
     document.getElementById('loginBtn').onclick = () => {
       const provider = new firebase.auth.GoogleAuthProvider();
       firebase.auth().signInWithPopup(provider)
       .then(({ user }) => console.log("🔑 Autenticato come", user.email))
       .catch(console.error);
     };
-    </script>
     
     firebase.auth().onAuthStateChanged(user => {
       if (!user) return;
