@@ -39,6 +39,8 @@
   <!-- Eruda: mobile console/debugger -->
   <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
   <script>eruda.init();</script>
+  <!-- TEST INIZIO -->
+  <script>console.log("SCRIPT INIZIO");document.body.insertAdjacentHTML('afterbegin','<p style="color:green">▶️ Inizio script</p>');</script>
   <div class="box">
     <h1>TCGP Tracker</h1>
     <div class="controls">
@@ -116,5 +118,7 @@
     function updateUI(){const packs=+document.getElementById("packs").value||3,total=cards.length,foundCount=Object.values(found).filter(v=>v).length;const solMiss=cards.filter((c,i)=>c[0]==="Solgaleo"&&!found[`Solgaleo_${cards.filter(cc=>cc[0]==="Solgaleo").indexOf(c)}`]).length;const lunMiss=cards.filter((c,i)=>c[0]==="Lunala"&&!found[`Lun...
     document.getElementById("packs").onchange=updateUI;document.getElementById("resetBtn").onclick=()=>{if(confirm("Azzera tutto?")){found={};dailyLog=[];saveStateToDB();renderList();updateUI();}};document.addEventListener("DOMContentLoaded",()=>{renderList();initCharts();updateUI();});
   </script>
+  <!-- TEST FINE -->
+  <script>console.log("SCRIPT FINE");document.body.insertAdjacentHTML('beforeend','<p style="color:green">✅ Fine script</p>');</script>
 </body>
 </html>
