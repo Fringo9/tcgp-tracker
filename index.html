@@ -36,6 +36,8 @@
   </style>
 </head>
 <body>
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>eruda.init();</script>
   <div class="box">
     <h1>TCGP Tracker</h1>
     <div class="controls">
@@ -56,15 +58,13 @@
     <div id="list"></div>
   </div>
   <script>
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
     const firebaseConfig = {
-      apiKey: "AIzaSyC0mhA5PSRQSirk4vuGKUzNs4L0TK7EGNw",
-      authDomain: "tcgp-tracker-ab396.firebaseapp.com",
-      projectId: "tcgp-tracker-ab396",
-      storageBucket: "tcgp-tracker-ab396.firebasestorage.app",
-      messagingSenderId: "967621803272",
-      appId: "1:967621803272:web:ef81deef2ad0a0d56e40bd",
-      measurementId: "G-E1370SR9TF"
+      apiKey: "TUA_API_KEY",
+      authDomain: "TUO_PROJECT_ID.firebaseapp.com",
+      projectId: "TUO_PROJECT_ID",
+      storageBucket: "TUO_PROJECT_ID.appspot.com",
+      messagingSenderId: "TUO_SENDER_ID",
+      appId: "TUO_APP_ID"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
@@ -89,10 +89,17 @@
       initCharts();
       updateUI();
     }
-
+    
     function saveStateToDB() {
-      if (!uid) return;
-      db.collection('users').doc(uid).set({ found, dailyLog });
+      if (!uid) {
+        console.warn("⚠️ UID non ancora disponibile: salto il salvataggio");
+        return;
+      }
+      console.log("🚀 Salvo su Firestore:", found);
+      db.collection('users').doc(uid)
+      .set({ found, dailyLog })
+      .then(() => console.log("✔️ Write OK"))
+      .catch(err => console.error("❌ Write KO:", err));
     }
 
     const cards = [
