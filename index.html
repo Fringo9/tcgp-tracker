@@ -40,6 +40,9 @@
   <script>eruda.init();</script>
   <div class="box">
     <h1>TCGP Tracker</h1>
+    <button id="loginBtn" style="margin-bottom:1rem;">
+      Accedi con Google
+    </button>
     <div class="controls">
       <label>Buste al giorno:
         <input type="number" id="packs" min="2" max="4" value="3">
@@ -74,14 +77,6 @@
     firebase.auth().signInAnonymously().catch(console.error);
 
     let uid, found = {}, dailyLog = [];
-    
-    <button id="loginBtn">Accedi con Google</button>
-    document.getElementById('loginBtn').onclick = () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      firebase.auth().signInWithPopup(provider)
-      .then(({ user }) => console.log("🔑 Autenticato come", user.email))
-      .catch(console.error);
-    };
     
     firebase.auth().onAuthStateChanged(user => {
       if (!user) return;
@@ -210,6 +205,17 @@
         found={};dailyLog=[];saveStateToDB();renderList();updateUI();
       }
     };
+    
+// attendo che il DOM abbia creato il bottone:
+document.addEventListener("DOMContentLoaded", () => {
+  const loginBtn = document.getElementById('loginBtn');
+  loginBtn.addEventListener('click', () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    // su mobile preferisci redirect
+    firebase.auth().signInWithRedirect(provider)
+      .catch(err => console.error("❌ Errore Google SignIn:", err));
+  });
+});
   </script>
 </body>
 </html>
