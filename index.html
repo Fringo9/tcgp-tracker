@@ -64,6 +64,10 @@
         border-radius: var(--radius);
         cursor: pointer;
       }
+      /* Nasconde tutto ciò che è solo per utenti autenticati */
+      .private-content {
+        display: none;
+      }
       .controls {
         display: flex;
         justify-content: center;
@@ -137,26 +141,29 @@
         <button id="btnGoogleLogout" style="display: none">Esci</button>
       </div>
 
-      <!-- Controllo buste al giorno -->
-      <div class="controls">
-        <label>
-          Buste al giorno:
-          <input type="number" id="packs" min="2" max="4" value="3" />
-        </label>
+      <!-- Contenuto riservato agli utenti loggati -->
+      <div class="private-content">
+        <!-- Controllo buste al giorno -->
+        <div class="controls">
+          <label>
+            Buste al giorno:
+            <input type="number" id="packs" min="2" max="4" value="3" />
+          </label>
+        </div>
+
+        <div id="counts" class="stats"></div>
+        <div id="pattern" class="stats"></div>
+        <div class="barWrap"><div id="progressBar" class="bar"></div></div>
+        <canvas id="percentileChart"></canvas>
+
+        <h2>Andamento giornaliero</h2>
+        <canvas id="dailyTrendChart"></canvas>
+
+        <h2>Mancanti per rarità</h2>
+        <canvas id="rarityChart"></canvas>
+        <hr />
+        <div id="list"></div>
       </div>
-
-      <div id="counts" class="stats"></div>
-      <div id="pattern" class="stats"></div>
-      <div class="barWrap"><div id="progressBar" class="bar"></div></div>
-      <canvas id="percentileChart"></canvas>
-
-      <h2>Andamento giornaliero</h2>
-      <canvas id="dailyTrendChart"></canvas>
-
-      <h2>Mancanti per rarità</h2>
-      <canvas id="rarityChart"></canvas>
-      <hr />
-      <div id="list"></div>
     </div>
 
     <!-- Librerie esterne -->
@@ -186,13 +193,15 @@
         const loginBtn = document.getElementById("btnGoogleLogin");
         const logoutBtn = document.getElementById("btnGoogleLogout");
         const packsInput = document.getElementById("packs");
+        const privateEl = document.querySelector(".private-content");
 
-        // 1) Stato di autenticazione
+        // Monitora lo stato di autenticazione
         firebase.auth().onAuthStateChanged((user) => {
           if (user) {
             uid = user.uid;
             loginBtn.style.display = "none";
             logoutBtn.style.display = "inline-block";
+            privateEl.style.display = "block";
 
             // Carica dati e avvia UI
             db.collection("users")
@@ -208,13 +217,14 @@
               )
               .finally(() => initApp());
           } else {
-            // Nessun utente loggato
+            // Utente non autenticato
             loginBtn.style.display = "inline-block";
             logoutBtn.style.display = "none";
+            privateEl.style.display = "none";
           }
         });
 
-        // 2) Login con Google (popup)
+        // Login con Google (popup)
         loginBtn.addEventListener("click", () => {
           const provider = new firebase.auth.GoogleAuthProvider();
           firebase
@@ -223,7 +233,7 @@
             .catch((err) => console.error("❌ Google SignIn error:", err));
         });
 
-        // 3) Logout
+        // Logout
         logoutBtn.addEventListener("click", () => {
           firebase
             .auth()
@@ -231,7 +241,7 @@
             .catch((err) => console.error("❌ Logout error:", err));
         });
 
-        // 4) Cambia i packs
+        // Cambia i packs
         packsInput.addEventListener("change", () => updateUI());
       });
 
@@ -240,7 +250,6 @@
         initCharts();
         updateUI();
       }
-
       function saveStateToDB() {
         if (!uid) return;
         db.collection("users")
@@ -251,7 +260,6 @@
           );
       }
 
-      // Dati carte e probabilità
       const cards = [
         ["Solgaleo", "Trevenant", 2],
         ["Solgaleo", "Tapu Bulu", 3],
