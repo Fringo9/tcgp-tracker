@@ -167,10 +167,19 @@
     </div>
 
     <!-- Librerie esterne -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script
+      defer
+      src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"
+    ></script>
+    <script
+      defer
+      src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"
+    ></script>
+    <script
+      defer
+      src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"
+    ></script>
 
     <script>
       // Configurazione Firebase
@@ -467,6 +476,15 @@
         });
         rarityChart.data.datasets[0].data = counts;
         rarityChart.update();
+      }
+    </script>
+    <script defer src="main.js"></script>
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("./service-worker.js")
+          .then((reg) => console.log("✅ SW registrato:", reg.scope))
+          .catch((err) => console.error("❌ SW registration failed:", err));
       }
     </script>
   </body>
