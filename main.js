@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   db = firebase.firestore();
 
-  // Monitora lo stato di autenticazione
+  // Monitora lo stato di autenticazione.
   firebase.auth().onAuthStateChanged((user) => {
     if (user) {
       uid = user.uid;

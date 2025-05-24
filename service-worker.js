@@ -10,7 +10,7 @@ const SHELL = [
   "./main.js",
 ];
 
-// 1) Al momento dell’installazione, pre-cache dell’app shell
+// 1) Al momento dell’installazione pre-cache dell’app shell
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
