@@ -1,3 +1,4 @@
+let db;
 let uid,
   found = {},
   dailyLog = [];
@@ -24,7 +25,8 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     firebase.initializeApp(firebaseConfig);
   }
-  const db = firebase.firestore();
+
+  db = firebase.firestore();
 
   // Monitora lo stato di autenticazione
   firebase.auth().onAuthStateChanged((user) => {
@@ -80,7 +82,7 @@ function initApp() {
   updateUI();
 }
 function saveStateToDB() {
-  if (!uid) return;
+  if (!uid || !db) return;
   db.collection("users")
     .doc(uid)
     .set({ found, dailyLog })
