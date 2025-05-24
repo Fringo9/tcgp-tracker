@@ -1,4 +1,4 @@
-const VERSION = "v2";
+const VERSION = "v3";
 const CACHE_NAME = `tcgp-shell-${VERSION}`;
 const SHELL = [
   "./", // la root dell’app

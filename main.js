@@ -1,4 +1,5 @@
 let db;
+let packsPerDay = 3;
 let uid,
   found = {},
   dailyLog = [];
@@ -44,6 +45,8 @@ document.addEventListener("DOMContentLoaded", () => {
           const data = doc.data() || {};
           found = data.found || {};
           dailyLog = data.dailyLog || [];
+          packsPerDay = data.packs || 3;
+          document.getElementById("packs").value = packsPerDay;
         })
         .catch((err) => console.error("❌ Errore lettura Firestore:", err))
         .finally(() => initApp());
@@ -73,7 +76,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Cambia i packs
-  packsInput.addEventListener("change", () => updateUI());
+  packsInput.addEventListener("change", () => {
+    packsPerDay = +packsInput.value || 3;
+    updateUI();
+    saveStateToDB();
+  });
 });
 
 function initApp() {
@@ -85,7 +92,7 @@ function saveStateToDB() {
   if (!uid || !db) return;
   db.collection("users")
     .doc(uid)
-    .set({ found, dailyLog })
+    .set({ found, dailyLog, packs: packsPerDay })
     .catch((err) => console.error("❌ Errore salvataggio Firestore:", err));
 }
 
@@ -127,6 +134,26 @@ const cards = [
   ["Lunala", "Rete da pesca", 2],
 ];
 const pR = { 1: 0.06664397, 2: 0.04365052, 3: 0.00917221, 4: 0.01661559 };
+
+function getMissingWeight(setName) {
+  return cards.reduce((sum, c) => {
+    const id = `${c[0]}_${cards.filter((cc) => cc[0] === c[0]).indexOf(c)}`;
+    return c[0] === setName && !found[id] ? sum + c[2] : sum;
+  }, 0);
+}
+
+// Calcola il pattern ottimale dato il numero di buste al giorno e la rarità delle mancanti
+function getOptimalPattern(weightL, weightS, packs) {
+  if (!packs) return { L: 0, S: 0 };
+  if (weightL === 0) return { L: 0, S: packs };
+  if (weightS === 0) return { L: packs, S: 0 };
+
+  let L = Math.round((packs * weightL) / (weightL + weightS));
+  if (L === 0) L = 1;
+  if (L === packs) L = packs - 1;
+
+  return { L, S: packs - L };
+}
 
 let percentileChart, dailyTrendChart, rarityChart;
 
@@ -262,12 +289,28 @@ function updateUI() {
       c[0] === "Lunala" &&
       !found[`${c[0]}_${cards.filter((cc) => cc[0] === c[0]).indexOf(c)}`]
   ).length;
+  const weightS = getMissingWeight("Solgaleo");
+  const weightL = getMissingWeight("Lunala");
 
   document.getElementById(
     "counts"
   ).textContent = `Trovate: ${foundCount}/${total} · Mancanti S: ${solMiss} · L: ${lunMiss}`;
+
+  const packsPerDay = +document.getElementById("packs").value || 3;
+  const { L: recL, S: recS } = getOptimalPattern(weightL, weightS, packsPerDay);
+
   document.getElementById("pattern").textContent =
-    lunMiss > 0 ? "Pattern: 2L + 1S" : "Pattern: solo Solgaleo";
+    recL && recS
+      ? `Pattern consigliato: ${recL}L + ${recS}S`
+      : recL
+      ? `Pattern consigliato: solo ${recL}L`
+      : `Pattern consigliato: solo ${recS}S`;
+
+  document.getElementById("patternHelp").title =
+    `Calcolo basato sui PUNTI-RARITÀ mancanti:\n` +
+    `• Lunala = ${weightL}\n• Solgaleo = ${weightS}\n` +
+    `Buste/giorno = ${packsPerDay}`;
+
   document.getElementById("progressBar").style.width =
     (foundCount / total) * 100 + "%";
 
