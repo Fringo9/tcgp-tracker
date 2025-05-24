@@ -1,4 +1,4 @@
-const VERSION = "v1";
+const VERSION = "v2";
 const CACHE_NAME = `tcgp-shell-${VERSION}`;
 const SHELL = [
   "./", // la root dell’app
@@ -7,6 +7,7 @@ const SHELL = [
   "./icon-192.png",
   "./icon-512.png",
   "./icon-1024.png",
+  "./main.js",
 ];
 
 // 1) Al momento dell’installazione, pre-cache dell’app shell

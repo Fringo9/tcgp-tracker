@@ -1,15 +1,3 @@
-// Configurazione Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyC0mhA5PSRQSirk4vuGKUzNs4L0TK7EGNw",
-  authDomain: "tcgp-tracker-ab396.firebaseapp.com",
-  projectId: "tcgp-tracker-ab396",
-  storageBucket: "tcgp-tracker-ab396.appspot.com",
-  messagingSenderId: "967621803272",
-  appId: "1:967621803272:web:ef81deef2ad0a0d56e40bd",
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
 let uid,
   found = {},
   dailyLog = [];
@@ -19,6 +7,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const logoutBtn = document.getElementById("btnGoogleLogout");
   const packsInput = document.getElementById("packs");
   const privateEl = document.querySelector(".private-content");
+
+  if (!window.firebase) {
+    console.error("Firebase non caricato");
+    return;
+  }
+  if (!firebase.apps.length) {
+    // Configurazione Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyC0mhA5PSRQSirk4vuGKUzNs4L0TK7EGNw",
+      authDomain: "tcgp-tracker-ab396.firebaseapp.com",
+      projectId: "tcgp-tracker-ab396",
+      storageBucket: "tcgp-tracker-ab396.appspot.com",
+      messagingSenderId: "967621803272",
+      appId: "1:967621803272:web:ef81deef2ad0a0d56e40bd",
+    };
+    firebase.initializeApp(firebaseConfig);
+  }
+  const db = firebase.firestore();
 
   // Monitora lo stato di autenticazione
   firebase.auth().onAuthStateChanged((user) => {
