@@ -1,6 +1,5 @@
 let db;
 const mcWorker = new Worker("./mc-worker.js", { type: "module" });
-import Chart from "./libs/chart.esm.js";
 
 let packsPerDay = 3;
 let uid,

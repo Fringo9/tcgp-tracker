@@ -7,6 +7,7 @@ const SHELL = [
   "./manifest.json",
   "./mc-worker.js",
   "./libs/chart.esm.js",
+  "./libs/chart.umd.js",
   "./libs/chart.js",
   "./libs/fb-app.js",
   "./libs/fb-auth.js",
