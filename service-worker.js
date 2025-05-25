@@ -23,11 +23,26 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// 2) Sul fetch, rispondi sempre con cache-first
+// 2) Gestione fetch: offline-first SOLO per asset ⇒
+//    fallback shell SOLO per richieste di navigazione
 self.addEventListener("fetch", (event) => {
-  event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request))
-  );
+  const req = event.request;
+
+  // 2A. Se è una richiesta di pagina (reload, link interno, “open-in-new-tab”)
+  if (req.mode === "navigate") {
+    event.respondWith(
+      caches
+        .match("./index.html") // usa lo shell precache
+        .then((resp) => resp || fetch(req))
+        .catch(() => caches.match("./index.html"))
+    );
+    return; // esci: nav gestita
+  }
+
+  // 2B. Per TUTTI gli altri GET dello stesso dominio (js, css, img…)
+  if (req.method === "GET" && new URL(req.url).origin === location.origin) {
+    event.respondWith(caches.match(req).then((cached) => cached || fetch(req)));
+  }
 });
 
 // 3) Al activate, pulisci eventuali cache vecchie
