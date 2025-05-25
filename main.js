@@ -54,8 +54,8 @@ document.addEventListener("DOMContentLoaded", () => {
           packsPerDay = data.packs || 3;
           document.getElementById("packs").value = packsPerDay;
         })
-        .catch((err) => console.error("❌ Errore lettura Firestore:", err))
-        .finally(() => initApp());
+        .catch((err) => console.error("❌ Errore lettura Firestore:", err));
+      //.finally(() => initApp());
     } else {
       // Utente non autenticato
       loginBtn.style.display = "inline-block";
@@ -95,11 +95,11 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 });
 
-//function initApp() {
-//renderList();
-//initCharts();
-//updateUI();
-//}
+function initApp() {
+  renderList();
+  initCharts();
+  updateUI();
+}
 function saveStateToDB() {
   if (!uid || !db) return;
   db.collection("users")
