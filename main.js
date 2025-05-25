@@ -251,7 +251,7 @@ function initCharts() {
           label: "Carte trovate",
           data: [],
           fill: false,
-          borderColor: "var(–primary)",
+          borderColor: "rgba(25,118,210,0.7)",
         },
       ],
     },
@@ -340,9 +340,6 @@ function updateUI() {
         () => refreshPercentiles(solMiss, lunMiss, packs, percentileChart),
         100
       );
-
-  percentileChart.data.datasets[0].data = [m50, m75, m90, m99];
-  percentileChart.update();
 
   dailyTrendChart.data.labels = dailyLog.map((e) => e.date);
   dailyTrendChart.data.datasets[0].data = dailyLog.map((e) => e.count);
