@@ -49,8 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
           dailyLog = data.dailyLog || [];
           packsPerDay = data.packs || 3;
           document.getElementById("packs").value = packsPerDay;
-          initCharts();
-          updateUI();
+          initApp();
         })
         .catch((err) => console.error("❌ Errore lettura Firestore:", err));
     } else {
