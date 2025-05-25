@@ -1,4 +1,10 @@
 let db;
+const mcWorker = new Worker("./mc-worker.js", { type: "module" });
+let Chart; // modulare
+import("./libs/chart.js").then((m) => {
+  Chart = m.default;
+  initApp();
+});
 let packsPerDay = 3;
 let uid,
   found = {},
@@ -89,11 +95,11 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 });
 
-function initApp() {
-  renderList();
-  initCharts();
-  updateUI();
-}
+//function initApp() {
+//renderList();
+//initCharts();
+//updateUI();
+//}
 function saveStateToDB() {
   if (!uid || !db) return;
   db.collection("users")
@@ -252,6 +258,7 @@ function initCharts() {
           data: [],
           fill: false,
           borderColor: "rgba(25,118,210,0.7)",
+          backgroundColor: "rgba(25,118,210,0.15)",
         },
       ],
     },
@@ -279,6 +286,10 @@ function initCharts() {
       plugins: { legend: { display: false } },
     },
   });
+
+  window.addEventListener("orientationchange", () =>
+    [percentileChart, dailyTrendChart, rarityChart].forEach((c) => c.resize())
+  );
 }
 
 function updateUI() {
@@ -323,13 +334,12 @@ function updateUI() {
   logDailyProgress(foundCount);
 
   function refreshPercentiles(s, l, p, chart) {
-    const runs =
-      navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2
-        ? 150
-        : 250;
-    const [m50, m75, m90, m99] = monteCarlo(s, l, p, runs);
-    chart.data.datasets[0].data = [m50, m75, m90, m99];
-    chart.update();
+    const runs = navigator.hardwareConcurrency <= 2 ? 80 : 200;
+    mcWorker.postMessage({ s, l, p, runs });
+    mcWorker.onmessage = (e) => {
+      chart.data.datasets[0].data = e.data;
+      chart.update();
+    };
   }
 
   requestIdleCallback

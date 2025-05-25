@@ -141,9 +141,12 @@
         color: var(--primary, #007aff);
         touch-action: manipulation; /* migliora il tap su iOS */
       }
+      canvas {
+        min-width: 280px;
+        min-height: 180px;
+      }
     </style>
     <!-- Librerie esterne -->
-    <script defer src="./libs/chart.js"></script>
     <script defer src="./libs/fb-app.js"></script>
     <script defer src="./libs/fb-auth.js"></script>
     <script defer src="./libs/fb-store.js"></script>

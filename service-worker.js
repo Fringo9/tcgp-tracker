@@ -1,4 +1,4 @@
-const VERSION = "v4";
+const VERSION = "v5";
 const CACHE_NAME = `tcgp-shell-${VERSION}`;
 const SHELL = [
   "./",
@@ -15,12 +15,7 @@ const SHELL = [
 
 // 1) Al momento dell’installazione pre-cache dell’app shell
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then((cache) => cache.addAll(SHELL))
-      .then(() => self.skipWaiting())
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(SHELL)));
 });
 
 // 2) Gestione fetch: offline-first SOLO per asset ⇒
