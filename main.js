@@ -1,12 +1,7 @@
 let db;
 const mcWorker = new Worker("./mc-worker.js", { type: "module" });
-let Chart;
-import("./libs/chart.js")
-  .then((m) => {
-    Chart = m.default || m.Chart; // Safari / Chrome compat
-    initApp(); // avvia l’app solo quando Chart è pronto
-  })
-  .catch((err) => console.error("❌ Chart.js load error:", err));
+import Chart from "./libs/chart.esm.js";
+
 let packsPerDay = 3;
 let uid,
   found = {},
@@ -55,6 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
           dailyLog = data.dailyLog || [];
           packsPerDay = data.packs || 3;
           document.getElementById("packs").value = packsPerDay;
+          initCharts();
           updateUI();
         })
         .catch((err) => console.error("❌ Errore lettura Firestore:", err));

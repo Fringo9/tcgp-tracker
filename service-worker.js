@@ -1,4 +1,4 @@
-const VERSION = "v6";
+const VERSION = "v7";
 const CACHE_NAME = `tcgp-shell-${VERSION}`;
 const SHELL = [
   "./",
@@ -6,6 +6,7 @@ const SHELL = [
   "./main.js",
   "./manifest.json",
   "./mc-worker.js",
+  "./libs/chart.esm.js",
   "./libs/chart.js",
   "./libs/fb-app.js",
   "./libs/fb-auth.js",
