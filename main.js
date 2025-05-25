@@ -1,10 +1,12 @@
 let db;
 const mcWorker = new Worker("./mc-worker.js", { type: "module" });
-let Chart; // modulare
-import("./libs/chart.js").then((m) => {
-  Chart = m.default;
-  initApp();
-});
+let Chart;
+import("./libs/chart.js")
+  .then((m) => {
+    Chart = m.default || m.Chart; // Safari / Chrome compat
+    initApp(); // avvia l’app solo quando Chart è pronto
+  })
+  .catch((err) => console.error("❌ Chart.js load error:", err));
 let packsPerDay = 3;
 let uid,
   found = {},
@@ -53,9 +55,9 @@ document.addEventListener("DOMContentLoaded", () => {
           dailyLog = data.dailyLog || [];
           packsPerDay = data.packs || 3;
           document.getElementById("packs").value = packsPerDay;
+          updateUI();
         })
         .catch((err) => console.error("❌ Errore lettura Firestore:", err));
-      //.finally(() => initApp());
     } else {
       // Utente non autenticato
       loginBtn.style.display = "inline-block";
@@ -335,7 +337,9 @@ function updateUI() {
 
   function refreshPercentiles(s, l, p, chart) {
     const runs = navigator.hardwareConcurrency <= 2 ? 80 : 200;
-    mcWorker.postMessage({ s, l, p, runs });
+    const { L: recL, S: recS } = getOptimalPattern(weightL, weightS, packs);
+    const pattern = [...Array(recL).fill("L"), ...Array(recS).fill("S")]; // es. [ "L","L","S" ]
+    mcWorker.postMessage({ s, l, p, runs, pattern });
     mcWorker.onmessage = (e) => {
       chart.data.datasets[0].data = e.data;
       chart.update();
