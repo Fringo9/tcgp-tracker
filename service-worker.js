@@ -1,13 +1,16 @@
-const VERSION = "v3";
+const VERSION = "v4";
 const CACHE_NAME = `tcgp-shell-${VERSION}`;
 const SHELL = [
-  "./", // la root dell’app
+  "./",
   "./index.html",
+  "./main.js",
   "./manifest.json",
+  "./libs/chart.js",
+  "./libs/fb-app.js",
+  "./libs/fb-auth.js",
+  "./libs/fb-store.js",
   "./icon-192.png",
   "./icon-512.png",
-  "./icon-1024.png",
-  "./main.js",
 ];
 
 // 1) Al momento dell’installazione pre-cache dell’app shell

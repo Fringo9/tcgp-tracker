@@ -14,6 +14,8 @@
       sizes="180x180"
       href="apple-touch-icon-180-padded.png"
     />
+    <link rel="preconnect" href="https://www.googleapis.com" />
+    <link rel="preconnect" href="https://firestore.googleapis.com" />
     <meta name="theme-color" content="#1976d2" />
     <title>TCGP Tracker</title>
     <style>
@@ -129,21 +131,22 @@
         width: 1rem;
         height: 1rem;
       }
+      .icon-btn {
+        background: none;
+        border: none;
+        font-size: 1.1rem;
+        line-height: 1;
+        padding: 0.25rem 0.4rem;
+        cursor: pointer;
+        color: var(--primary, #007aff);
+        touch-action: manipulation; /* migliora il tap su iOS */
+      }
     </style>
     <!-- Librerie esterne -->
-    <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script
-      defer
-      src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"
-    ></script>
-    <script
-      defer
-      src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"
-    ></script>
-    <script
-      defer
-      src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"
-    ></script>
+    <script defer src="./libs/chart.js"></script>
+    <script defer src="./libs/fb-app.js"></script>
+    <script defer src="./libs/fb-auth.js"></script>
+    <script defer src="./libs/fb-store.js"></script>
   </head>
   <body>
     <div class="box">
@@ -167,7 +170,13 @@
 
         <div id="counts" class="stats"></div>
         <div id="pattern" class="stats"></div>
-        <span id="patternHelp" style="cursor: help">🛈</span>
+        <button
+          id="patternHelp"
+          aria-label="Mostra dettagli pattern"
+          class="icon-btn"
+        >
+          🛈
+        </button>
         <div class="barWrap"><div id="progressBar" class="bar"></div></div>
         <canvas id="percentileChart"></canvas>
 

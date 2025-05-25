@@ -81,6 +81,12 @@ document.addEventListener("DOMContentLoaded", () => {
     updateUI();
     saveStateToDB();
   });
+
+  document
+    .getElementById("patternHelp")
+    .addEventListener("click", () =>
+      alert(document.getElementById("patternHelp").dataset.tip)
+    );
 });
 
 function initApp() {
@@ -306,17 +312,35 @@ function updateUI() {
       ? `Pattern consigliato: solo ${recL}L`
       : `Pattern consigliato: solo ${recS}S`;
 
-  document.getElementById("patternHelp").title =
-    `Calcolo basato sui PUNTI-RARITÀ mancanti:\n` +
-    `• Lunala = ${weightL}\n• Solgaleo = ${weightS}\n` +
-    `Buste/giorno = ${packsPerDay}`;
+  document.getElementById("patternHelp").dataset.tip =
+    `• Lunala: ${weightL} punti\n` +
+    `• Solgaleo: ${weightS} punti\n` +
+    `Buste/giorno: ${packsPerDay}`;
 
   document.getElementById("progressBar").style.width =
     (foundCount / total) * 100 + "%";
 
   logDailyProgress(foundCount);
 
-  const [m50, m75, m90, m99] = monteCarlo(solMiss, lunMiss, packs);
+  function refreshPercentiles(s, l, p, chart) {
+    const runs =
+      navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2
+        ? 150
+        : 250;
+    const [m50, m75, m90, m99] = monteCarlo(s, l, p, runs);
+    chart.data.datasets[0].data = [m50, m75, m90, m99];
+    chart.update();
+  }
+
+  requestIdleCallback
+    ? requestIdleCallback(() =>
+        refreshPercentiles(solMiss, lunMiss, packs, percentileChart)
+      )
+    : setTimeout(
+        () => refreshPercentiles(solMiss, lunMiss, packs, percentileChart),
+        100
+      );
+
   percentileChart.data.datasets[0].data = [m50, m75, m90, m99];
   percentileChart.update();
 
