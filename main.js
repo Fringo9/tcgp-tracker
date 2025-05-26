@@ -49,9 +49,9 @@ document.addEventListener("DOMContentLoaded", () => {
           dailyLog = data.dailyLog || [];
           packsPerDay = data.packs || 3;
           document.getElementById("packs").value = packsPerDay;
-          initApp();
         })
-        .catch((err) => console.error("❌ Errore lettura Firestore:", err));
+        .catch((err) => console.error("❌ Errore lettura Firestore:", err))
+        .finally(() => initApp());
     } else {
       // Utente non autenticato
       loginBtn.style.display = "inline-block";
